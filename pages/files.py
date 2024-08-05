@@ -91,6 +91,7 @@ else:
     if len(st.session_state.path) > 1:
         if st.button("Go Back"):
             go_back()
+            st.rerun()
 
     current_folder_id = st.session_state.path[-1]
     files = list_files(service, current_folder_id)
@@ -99,7 +100,7 @@ else:
         st.session_state.selected_files = []
 
     folders = [f for f in files if f['mimeType'] == 'application/vnd.google-apps.folder']
-    other_files = [f for f in files if f['mimeType'] != 'application/vnd.google-apps.folder']
+    all_files = [f for f in files if f['mimeType'] != 'application/vnd.google-apps.folder']
 
     col1, col2 = st.columns(2)
 
@@ -108,23 +109,23 @@ else:
         for folder in folders:
             if st.button(folder['name']):
                 navigate_to_folder(folder['id'], folder['name'])
+                st.rerun()
 
     
     selected_files = st.session_state.selected_files
-    print(selected_files)
     with col2:  
         st.header("Files")
-        for file in other_files:
+        for file in all_files:
             is_selected = any(f['id'] == file['id'] for f in selected_files)
             if st.checkbox(file['name'], key=file['id'], value=is_selected):
                 if not is_selected:
                     selected_files.append(file)
-                    st.rerun(scope="fragment")
+                    st.rerun()
             else:
                 if is_selected:
                     selected_files = [f for f in selected_files if f['id'] != file['id']]
                     st.session_state.selected_files = selected_files
-                    st.rerun(scope="fragment")
+                    st.rerun()
 
     if selected_files:
         if st.button("Download Selected Files as ZIP"):
