@@ -18,8 +18,11 @@ def list_files(service, folder_id='root', load_next_page=False):
     if 'file_cache' not in st.session_state:
         st.session_state.file_cache = {}
     
+    if 'files' not in st.session_state:
+        st.session_state.files = {}
+
+
     if folder_id in st.session_state.file_cache and not load_next_page:
-        print("Using cache")
         return st.session_state.file_cache[folder_id]['files']
     
     query = (
@@ -45,6 +48,10 @@ def list_files(service, folder_id='root', load_next_page=False):
         'files': files,
         'nextPageToken': nextPageToken
     }
+
+    for f in files:
+        st.session_state.files[f['id']] = f
+
     return files
 
 
@@ -111,22 +118,24 @@ else:
                 navigate_to_folder(folder['id'], folder['name'])
                 st.rerun()
 
-    
-    selected_files = st.session_state.selected_files
+
     with col2:  
         st.header("Files")
         for file in all_files:
-            is_selected = any(f['id'] == file['id'] for f in selected_files)
-            if st.checkbox(file['name'], key=file['id'], value=is_selected):
-                if not is_selected:
-                    selected_files.append(file)
-                    st.rerun()
-            else:
-                if is_selected:
-                    selected_files = [f for f in selected_files if f['id'] != file['id']]
-                    st.session_state.selected_files = selected_files
-                    st.rerun()
+            is_selected = any(f['id'] == file['id'] for f in st.session_state.selected_files)
 
+            def on_change(fid):
+                if st.session_state[fid]:
+                    f = st.session_state.files[fid]
+                    st.session_state.selected_files.append(f)
+                else:
+                    selected_files = [f for f in st.session_state.selected_files if f['id'] != fid]
+                    st.session_state.selected_files = selected_files
+
+            st.checkbox(file['name'], key=file['id'], value=is_selected, on_change=on_change, args=[file['id']])
+
+
+    selected_files = st.session_state.selected_files
     if selected_files:
         if st.button("Download Selected Files as ZIP"):
             with io.BytesIO() as zip_buffer:
