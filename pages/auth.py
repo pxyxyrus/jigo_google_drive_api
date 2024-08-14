@@ -43,7 +43,7 @@ if 'credentials' not in st.session_state:
 if st.session_state['credentials'] is None:
     flow = init_flow()
     authorization_url = get_authorization_url(flow)
-    st.write(f"[Authenticate with Google]({authorization_url})")
+    st.link_button("Authenticate with Google", authorization_url)
 
     # Get authorization response code from URL
     if 'code' in st.query_params and st.query_params['code']:
