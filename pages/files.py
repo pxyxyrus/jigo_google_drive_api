@@ -143,6 +143,7 @@ else:
                     for file in selected_files:
                         file_io = download_file(service, file['id'])
                         zip_file.writestr(f"{file['name']}", file_io.getvalue())
+                st.session_state.selected_files.clear()
                 zip_buffer.seek(0)
                 st.download_button(
                     label="Download ZIP",
