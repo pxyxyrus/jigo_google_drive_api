@@ -1,20 +1,11 @@
 import streamlit as st
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
-import io
 import zipfile
-from google.auth.transport.requests import Request
+from src.google_helper import *
 
-# Function to load credentials
-def load_credentials():
-    if 'credentials' not in st.session_state:
-        st.session_state.credentials = None
-    return st.session_state.credentials
 
 
 # Function to list non-Google Docs editor files in a specific folder
-def list_files(service, folder_id='root', load_next_page=False):
+def list_files(folder_id='root', load_next_page=False):
     if 'file_cache' not in st.session_state:
         st.session_state.file_cache = {}
     
@@ -36,12 +27,7 @@ def list_files(service, folder_id='root', load_next_page=False):
     nextPageToken = None
     if folder_id in st.session_state.file_cache:
         nextPageToken = st.session_state.file_cache['folder_id'].get('nextPageToken', None)
-    results = service.files().list(
-        q=query,
-        pageSize=100,
-        fields="nextPageToken, files(id, name, mimeType)",
-        pageToken=nextPageToken
-    ).execute()
+    results = get_files(query, nextPageToken)
     files = results.get('files', [])
     nextPageToken = results.get('nextPageToken')
     st.session_state.file_cache[folder_id] = {
@@ -54,17 +40,6 @@ def list_files(service, folder_id='root', load_next_page=False):
 
     return files
 
-
-# Function to download a file
-def download_file(service, file_id):
-    request = service.files().get_media(fileId=file_id)
-    file_io = io.BytesIO()
-    downloader = MediaIoBaseDownload(file_io, request)
-    done = False
-    while not done:
-        status, done = downloader.next_chunk()
-    file_io.seek(0)
-    return file_io
 
 
 def navigate_to_folder(folder_id, folder_name):
@@ -81,13 +56,15 @@ def go_back():
 # File Explorer Page
 st.title("Google Drive File Explorer")
 
-creds = load_credentials()
+creds = get_credentials_from_session()
 
 if creds is None:
     st.warning("Please authenticate first on the Authentication page.")
-else:
-    service = build('drive', 'v3', credentials=creds)
+    if st.button("Go to Authentication"):
+        st.switch_page("./src/pages/auth.py")
 
+else:
+    init_service()
     if 'path' not in st.session_state:
         st.session_state.path = ['root']
         st.session_state.names = ['My Drive']
@@ -101,7 +78,7 @@ else:
             st.rerun()
 
     current_folder_id = st.session_state.path[-1]
-    files = list_files(service, current_folder_id)
+    files = list_files(current_folder_id)
 
     if 'selected_files' not in st.session_state:
         st.session_state.selected_files = []
@@ -141,7 +118,7 @@ else:
             with io.BytesIO() as zip_buffer:
                 with zipfile.ZipFile(zip_buffer, "w") as zip_file:
                     for file in selected_files:
-                        file_io = download_file(service, file['id'])
+                        file_io = download_file(file['id'])
                         zip_file.writestr(f"{file['name']}", file_io.getvalue())
                 st.session_state.selected_files.clear()
                 zip_buffer.seek(0)
