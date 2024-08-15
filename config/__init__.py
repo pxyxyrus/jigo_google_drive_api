@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-server_config = os.environ.get("SERVER_CONFIG")
+config_name = os.environ.get("CONFIG")
 
-if server_config is None:
-    raise Exception("SERVER_CONFIG not specified")
+if config_name is None:
+    raise Exception("CONFIG not specified")
 
-config = toml.load("{}/{}/config.toml".format(os.path.dirname(__file__), server_config))
+config = toml.load("{}/{}/config.toml".format(os.path.dirname(__file__), config_name))
