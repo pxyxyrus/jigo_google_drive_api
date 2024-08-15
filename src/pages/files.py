@@ -24,15 +24,15 @@ def list_files(folder_id='root', load_next_page=False):
         "mimeType != 'application/vnd.google-apps.form'"
     )
 
-    nextPageToken = None
+    next_page_token = None
     if folder_id in st.session_state.file_cache:
-        nextPageToken = st.session_state.file_cache['folder_id'].get('nextPageToken', None)
-    results = get_files(query, nextPageToken)
+        next_page_token = st.session_state.file_cache['folder_id'].get('nextPageToken', None)
+    results = get_files(query, next_page_token)
     files = results.get('files', [])
-    nextPageToken = results.get('nextPageToken')
+    next_page_token = results.get('nextPageToken')
     st.session_state.file_cache[folder_id] = {
         'files': files,
-        'nextPageToken': nextPageToken
+        'nextPageToken': next_page_token
     }
 
     for f in files:

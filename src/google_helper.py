@@ -58,12 +58,12 @@ def init_service():
         service = build('drive', 'v3', credentials=creds)
 
 
-def get_files(query, nextPageToken):
+def get_files(query, page_size=100, next_page_token=None, fields="nextPageToken, files(id, name, mimeType)"):
     return service.files().list(
         q=query,
-        pageSize=100,
-        fields="nextPageToken, files(id, name, mimeType)",
-        pageToken=nextPageToken
+        pageSize=page_size,
+        fields=fields,
+        pageToken=next_page_token
     ).execute()
 
 
