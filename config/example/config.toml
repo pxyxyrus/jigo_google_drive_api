@@ -1,0 +1,3 @@
+[google]
+client_secrets_file = "path_to_your_credentials.json"
+redirect_uri = "your_web_apps_redirect_uri"

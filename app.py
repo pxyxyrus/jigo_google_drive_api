@@ -1,4 +1,5 @@
 import streamlit as st
+import config
 
 auth_page = st.Page("./src/pages/auth.py", title="auth")
 files_page = st.Page("./src/pages/files.py", title="files")

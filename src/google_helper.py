@@ -5,15 +5,17 @@ from googleapiclient.http import MediaIoBaseDownload
 import io
 from google.auth.transport.requests import Request
 import streamlit as st
+from config import config
 
 # Path to your client_secret.json file
-CLIENT_SECRETS_FILE = "credentials.json"
+CLIENT_SECRETS_FILE = config['google']['client_secrets_file']
 
 # Define the scopes
+# For this app we only need access to Google Drive
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
 # Redirect URI
-REDIRECT_URI = "http://localhost:8501/auth"
+REDIRECT_URI = config['google']['redirect_uri']
 
 service = None
 

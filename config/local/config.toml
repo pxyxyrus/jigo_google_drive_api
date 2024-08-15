@@ -1,0 +1,3 @@
+[google]
+client_secrets_file = "credentials.json"
+redirect_uri = "http://localhost:8501/auth"
