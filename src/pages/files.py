@@ -57,7 +57,6 @@ def go_back():
 st.title("Google Drive File Explorer")
 
 creds = get_credentials_from_session()
-
 if creds is None:
     st.warning("Please authenticate first on the Authentication page.")
     if st.button("Go to Authentication"):
@@ -86,7 +85,7 @@ else:
     folders = [f for f in files if f['mimeType'] == 'application/vnd.google-apps.folder']
     all_files = [f for f in files if f['mimeType'] != 'application/vnd.google-apps.folder']
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
         st.header("Folders")
@@ -94,7 +93,6 @@ else:
             if st.button(folder['name']):
                 navigate_to_folder(folder['id'], folder['name'])
                 st.rerun()
-
 
     with col2:  
         st.header("Files")
@@ -105,12 +103,23 @@ else:
                 if st.session_state[fid]:
                     f = st.session_state.files[fid]
                     st.session_state.selected_files.append(f)
+                    st.session_state.last_clicked_file = f
                 else:
                     selected_files = [f for f in st.session_state.selected_files if f['id'] != fid]
                     st.session_state.selected_files = selected_files
+                    st.session_state.last_clicked_file = None
 
             st.checkbox(file['name'], key=file['id'], value=is_selected, on_change=on_change, args=[file['id']])
 
+    last_clicked_file = st.session_state.last_clicked_file if 'last_clicked_file' in st.session_state else None
+    if last_clicked_file:
+        with col3:
+            st.subheader("File Metadata")
+            file = st.session_state.last_clicked_file
+            st.write(f"**File:** {file['name']}")
+            st.write(f"Created Date: {file['createdTime']}")
+            st.write(f"Modified Date: {file['modifiedTime']}")
+            st.write(f"Size: {file.get('size', 'Unknown')} bytes")
 
     selected_files = st.session_state.selected_files
     if selected_files:

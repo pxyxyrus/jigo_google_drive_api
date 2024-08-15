@@ -58,7 +58,7 @@ def init_service():
         service = build('drive', 'v3', credentials=creds)
 
 
-def get_files(query, page_size=100, next_page_token=None, fields="nextPageToken, files(id, name, mimeType)"):
+def get_files(query, page_size=100, next_page_token=None, fields="nextPageToken, files(id, name, mimeType, createdTime, modifiedTime, size)"):
     return service.files().list(
         q=query,
         pageSize=page_size,
